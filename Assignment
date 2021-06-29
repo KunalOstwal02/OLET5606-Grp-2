@@ -53,6 +53,22 @@ It should be a clear, interesting summary of main insights from the report.
 - Explore the data structure
 - Look for outliers and missing data
 
+#CLEANING
+```{r}
+library(tidyverse) # piping `%>%`, plotting, reading data
+library(skimr) # exploratory data summary
+library(naniar) # exploratory plots
+library(kableExtra) # tables
+library(lubridate) # for date variables
+library(plotly)
+```
+```{r}
+cleannyc = nyc %>% filter(ZIP.CODE!="Null") 
+cleannyc = nyc %>% filter(LATITUDE!="Null")
+cleannyc = nyc %>% filter(LONGITUDE!="Null")
+cleannyc = na.omit(cleannyc)
+table(is.na(cleannyc)) #CHECK FOR NA
+```
 
 # Research Question 1 - [INSERT QUESTION HERE]
 

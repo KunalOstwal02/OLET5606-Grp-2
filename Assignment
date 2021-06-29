@@ -62,14 +62,45 @@ library(kableExtra) # tables
 library(lubridate) # for date variables
 library(plotly)
 ```
+
+
 ```{r}
+nyc %>% glimpse()
+nyc %>% summary()
+vis_miss(nyc, warn_large_data = FALSE)
 cleannyc = nyc %>% filter(ZIP.CODE!="Null") 
 cleannyc = nyc %>% filter(LATITUDE!="Null")
 cleannyc = nyc %>% filter(LONGITUDE!="Null")
+
+cleannyc %>% glimpse()
+table(is.na(cleannyc))
 cleannyc = na.omit(cleannyc)
-table(is.na(cleannyc)) #CHECK FOR NA
+vis_miss(cleannyc, warn_large_data = FALSE)
+
 ```
 
+Initially we can determine through the visualisation there are many missing data inputs, specifically in the zip code, latitude and longitude columns. Because of this we create a sub dataset called cleannyc which includes only the values where there are no Null values. However, we also use is.na function to determine if there are still missing data entries. We then use the na.omit function to omit all entries with no values within. The reason we omit rows with missing data points is that it will be impossible to perform aggregates with missing data, and will have complications once visualising data. We finally use another vis_miss function to compare the two datasets and determine the amount of data missing in the new dataset cleannyc. 
+
+```{r}
+boxplot(cleannyc[,11:18],cex.axis = 0.6, las = 1, horizontal = TRUE,par(mar= c(5, 10, 4, 2) + 0.1))
+```
+As we can see in the boxplot above, there are many outliers especially in the number of motorist injured, and number of persons injured. Upon inspection when there was the number of motorist injured, it occurred at 9/9/2013 and is a [Brooklyn Bus Accident](https://www.dnainfo.com/new-york/20130909/bed-stuy/43-people-injured-bed-stuy-when-car-collides-head-on-with-city-bus/) which left 43 people injured when a car collided head on with a bus. And it also turns out that this is the same entry for the outlier in number of persons injured. The reasons why it is in both persons and motorist category is because the 43 people are in the bus, therefore classified as motorists. These outliers without inspection may seem extraordinary and perhaps a possibility of being faulty data collection, however with a further glance they seem to be valid and an important part of our data analysis. In fact in comparison to the mean and median of all these columns, most of the circles shown in the graph are considered outliers. Evidently the median and mean are around 0 accidents, which is expected. Because we have so many entries in data, and the probability of being in an accident is relatively small, this graph is exposed to skewedness, and thus we cannnot say that all these data points greater than 0 are outliers.
+
+
+```{r}
+max(cleannyc$NUMBER.OF.MOTORIST.INJURED)
+cleannyc %>% filter(NUMBER.OF.MOTORIST.INJURED == 43)
+max(cleannyc$NUMBER.OF.PERSONS.INJURED)
+cleannyc %>% filter(NUMBER.OF.PERSONS.INJURED == 43)
+```
+
+Even though these outliers are valid, they will affect our aggregate data, by dragging the mean higher than it should be. This is why median is much better than using mean, as it is not as affected by high outliers. We do not care about low outliers as the base is 0 and cannot fall lower. We can also take a look into more details and the affect of these two outliers using the graph below.
+
+```{r}
+fig = plot_ly(y = cleannyc$NUMBER.OF.PERSONS.INJURED, type = "box", name = "Number of Persons Injured")
+fig = fig %>% add_trace(y = cleannyc$NUMBER.OF.MOTORIST.INJURED, name = "Number of Motorists Injured") %>% layout(title = "Persons Injured and Motorist Injured Outlier Analysis")
+fig
+```
 # Research Question 1 - [INSERT QUESTION HERE]
 
 Here you should

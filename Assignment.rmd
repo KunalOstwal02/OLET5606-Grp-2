@@ -93,7 +93,6 @@ vis_miss(cleannyc, warn_large_data = FALSE)
 
 ```
 
-Initially we can determine through the visualisation there are many missing data inputs, specifically in the zip code, latitude and longitude columns. Because of this we create a sub dataset called cleannyc which includes only the values where there are no Null values. However, we also use is.na function to determine if there are still missing data entries. We then use the na.omit function to omit all entries with no values within. The reason we omit rows with missing data points is that it will be impossible to perform aggregates with missing data, and will have complications once visualising data. We finally use another vis_miss function to compare the two datasets and determine the amount of data missing in the new dataset cleannyc. 
 
 ```{r}
 boxplot(cleannyc[,11:18],cex.axis = 0.6, las = 1, horizontal = TRUE,par(mar= c(5, 10, 4, 2) + 0.1))

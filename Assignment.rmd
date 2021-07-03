@@ -1,7 +1,7 @@
 ---
 title: "Data Wrangling - Project"
 subtitle: "Insert topic here"
-author: "Insert your name/s"
+author: "Kunal Ostwal, Martin Huang & Rose Power (Group 2)"
 date: 
 output:
   html_document:
@@ -54,17 +54,18 @@ It should be a clear, interesting summary of main insights from the report.
 - Look for outliers and missing data
 
 Background to report
-Motor vehicle collisions are a major cause of death and injury in New York (ref). The purpose of this report is to inform stakeholders of the geospatial patterns of motor vehicle collisions in NYC from 2012-2021, whilst providing some information on the initial data analysis. Relevant stakeholders who may benefit from the research presented in this report include the New York Police Department (NYPD), NYC Open Data, NYC Government, motor vehicle manufacturers, car insurance companies, road safety professionals, NYC pedestrians, cyclists and motorists, and the general public.
+Motor vehicle collisions are a major cause of death and injury in New York (City of New York, 2021). This report aims to inform stakeholders of the geospatial patterns of motor vehicle collisions in NYC from 2012-2021. Relevant stakeholders include the New York Police Department (NYPD), NYC Open Data, NYC Government, road safety professionals, and the public.
 
 Assessment of data provenance
-The Motor Vehicle Collisions crash data (available at: https://data.cityofnewyork.us/Public-Safety/Motor-Vehicle-Collisions-Crashes/h9gi-nx95) was sourced from NYC OpenData and was provided by the New York Police Department (NYPD) for public safety purposes. The dataset is classified as free public data, and the NYC OpenData website includes thorough information on attribution, creation date, and the data generation process. The data was collected by police officers, who completed a MV-104AN report for all vehicle collisions in NYC that resulted in human injuries or fatalities, or at least $1000 worth of damage. From 1999-2016, only very basic data was collected by police officers as not all MV-104AN fields were entered. With the introduction of the Finest Online Records Management System (FORMS) in 2016, police officers began entering all MV-104AN fields using an electronic device. Thus, data prior to 2016 may contain fewer collision details compared to data after 2016. An additional limitation to this dataset is the absence of data prior to 2014, which prevents our ability to analyse trends over a longer period. The data is reliable as it was inputted by police officers who were trained in the data collection process. However, potential human error must still be considered. The dataset is regularly updated (daily) and a ‘MVCDataDictionary’ spreadsheet is available which records the revision history of the dataset. No changes have been documented on the spreadsheet thus far.
+The Motor Vehicle Collisions crash data was sourced from NYC OpenData and was provided by the NYPD for public safety purposes (NYC OpenData, 2021). The dataset is classified as free public data and the NYC OpenData website includes thorough information on attribution, creation date, and the data generation process (NYC OpenData, 2021). Data was collected by police officers, who completed a MV-104AN report for all vehicle collisions in NYC (NYC OpenData, 2021). Only very basic data was collected from 1999-2016, and more detailed information was collected from 2016 (NYC OpenData, 2021). An additional limitation is the absence of data prior to 2014, which prevents our ability to analyse trends over a longer period. The data is reliable as it was inputted by trained police officers (NYC OpenData, 2021). However, potential human error must still be considered. The dataset is updated daily and a ‘MVCDataDictionary’ spreadsheet records revision history (NYC OpenData, 2021).
 
 Domain knowledge
-NYC is one of the busiest cities in the world with a population of ~8,340,000 across 783.8 km². The city consists of five boroughs including Brooklyn, the Bronx, Manhattan, Queens and Staten Island. The Cross Bronx Expressway in NYC has been identified as the most congested road in the U.S. Other highly congested roads in NYC include sections of the George Washington Bridge, Fifth Avenue, and the Lincoln Tunnel. Previous reports indicated that pedestrians were ten times more likely to be killed than motorists in a crash, and most serious crashes involved private vehicles. In terms of geospatial trends, pedestrian collisions were two-thirds deadlier on major roads compared to smaller streets. Manhattan had four times more pedestrians injured or killed compared to the other boroughs.
-For ethics and privacy purposes, the Motor Vehicle Collisions dataset does not reveal any confidential information about the individuals involved in the collisions.
+NYC is one of the busiest cities in the world. The Cross Bronx Expressway in NYC has been identified as the most congested road in the U.S. (INRIX, 2017). Other highly congested roads in NYC include sections of the George Washington Bridge, Fifth Avenue, and the Lincoln Tunnel (INRIX, 2017). Previous reports indicated that pedestrian collisions were two-thirds deadlier on major roads compared to smaller streets, and Manhattan had four times more pedestrians injured or killed compared to other boroughs (Viola R, Roe M, & Shin H, 2010). For ethics and privacy purposes, the Motor Vehicle Collisions dataset does not reveal confidential information about individuals.
 
 Data structure
-The Motor Vehicle Collisions crash table consists of 1.7 million rows and 29 columns. Each row corresponds to a motor vehicle collision, whereas the columns provide details of the crash including the date, time, location (borough, zip code, latitude, longitude, street names), number of persons/pedestrians/cyclists/motorists killed or injured, contributing factors, and vehicle type.
+The dataset consists of 1.7 million rows and 29 columns. Each row corresponds to a motor vehicle collision, whereas the columns provide details of the collision.
+
+Words: 304 (excluding references)
 
 
 #CLEANING
@@ -136,3 +137,14 @@ Here you should
 
 Insert your reflection on how data wrangling helped you explore your research questions.
 (Don't forget to adjust information at the top of report regarding your name in the author field etc!!)
+
+# References
+City of New York. (2021). Vision Zero in New York City. Retrieved from https://www1.nyc.gov/content/visionzero/pages/.
+
+INRIX. (2017). Los Angeles Tops INRIX Global Congestion Ranking 2016 [Press release]. Retrieved from https://inrix.com/press-releases/los-angeles-tops-inrix-global-congestion-ranking/.
+
+NYC OpenData. (2021). Motor Vehicle Collisions - Crashes. Retrieved from https://data.cityofnewyork.us/Public-Safety/Motor-Vehicle-Collisions-Crashes/h9gi-nx95.
+
+Viola R, Roe M, & Shin H. (2010). The New York City Pedestrian Safety Study & Action Plan.  Retrieved from https://www1.nyc.gov/html/dot/downloads/pdf/nyc_ped_safety_study_action_plan.pdf.
+
+

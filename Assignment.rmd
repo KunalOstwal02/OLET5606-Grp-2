@@ -139,7 +139,7 @@ According to Mark Cunningham in EMS. One More Time(2015)^4^, the reason for this
 This problem can be addressed by understanding and analyzing the trends in traffic incidences. For instance, it can be observed from the above graph that 25^th^ December is often the least violent day on the road of the year. By exploring more such trends, the FDNY would be better equipped to improve their response time and save numerous lives.  
 
 ```{r}
-cleannyc %>% separate(CRASH.TIME, c("hour", "min"), ":") %>% separate(CRASH.DATE, c("Month", "Day", "Year"), "/", remove = FALSE) -> cleannyc
+cleannyc %>% separate(CRASH.TIME, c("hour", "min"), ":") -> cleannyc
 ```
 ```{r}
 as.data.frame(table(cleannyc$hour)) -> time_freq
@@ -150,17 +150,8 @@ time_freq$Var1$Freq  <- NULL
 
 ```{r}
 cleannyc %>% mutate(
-  killed = (NUMBER.OF.PERSONS.KILLED + 
-              NUMBER.OF.PEDESTRIANS.KILLED + 
-              NUMBER.OF.CYCLIST.KILLED + 
-              NUMBER.OF.MOTORIST.KILLED
-            ), 
-  injured = (NUMBER.OF.PERSONS.INJURED + 
-               NUMBER.OF.PEDESTRIANS.INJURED + 
-               NUMBER.OF.CYCLIST.INJURED + 
-               NUMBER.OF.MOTORIST.INJURED
-             )) %>% mutate(
-      score = (killed * 0.1 + injured*0.025)) -> cleannyc
+  killed = (NUMBER.OF.PERSONS.KILLED), 
+  injured = (NUMBER.OF.PERSONS.INJURED)) -> cleannyc
 ```
 
 ## Daily trend in Accident Occurence

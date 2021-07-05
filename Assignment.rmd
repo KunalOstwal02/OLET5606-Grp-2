@@ -78,26 +78,25 @@ library(lubridate) # for date variables
 library(plotly)
 ```
 
+```{r}
+nyc = read.csv("MVC.csv")
+```
 
 ```{r}
-nyc %>% glimpse()
-nyc %>% summary()
-vis_miss(nyc, warn_large_data = FALSE)
-cleannyc = nyc %>% filter(ZIP.CODE!="Null") 
-cleannyc = nyc %>% filter(LATITUDE!="Null")
-cleannyc = nyc %>% filter(LONGITUDE!="Null")
-
-cleannyc %>% glimpse()
-table(is.na(cleannyc))
+#nyc %>% glimpse()
+#nyc %>% summary()
+cleannyc <- nyc[!(nyc$LONGITUDE == "" | nyc$LATITUDE == "" | nyc$LOCATION == "" | nyc$LATITUDE == 0 | nyc$LONGITUDE == 0),]
+#cleannyc %>% glimpse()
+#table(is.na(cleannyc))
 cleannyc = na.omit(cleannyc)
-vis_miss(cleannyc, warn_large_data = FALSE)
-
+#vis_miss(cleannyc, warn_large_data = FALSE)
 ```
 
 
 ```{r}
-boxplot(cleannyc[,11:18],cex.axis = 0.6, las = 1, horizontal = TRUE,par(mar= c(5, 10, 4, 2) + 0.1))
+#boxplot(cleannyc[,11:18],cex.axis = 0.6, las = 1, horizontal = TRUE,par(mar= c(5, 10, 4, 2) + 0.1))
 ```
+
 As we can see in the boxplot above, there are many outliers especially in the number of motorist injured, and number of persons injured. Upon inspection when there was the number of motorist injured, it occurred at 9/9/2013 and is a [Brooklyn Bus Accident](https://www.dnainfo.com/new-york/20130909/bed-stuy/43-people-injured-bed-stuy-when-car-collides-head-on-with-city-bus/) which left 43 people injured when a car collided head on with a bus. And it also turns out that this is the same entry for the outlier in number of persons injured. The reasons why it is in both persons and motorist category is because the 43 people are in the bus, therefore classified as motorists. These outliers without inspection may seem extraordinary and perhaps a possibility of being faulty data collection, however with a further glance they seem to be valid and an important part of our data analysis. In fact in comparison to the mean and median of all these columns, most of the circles shown in the graph are considered outliers. Evidently the median and mean are around 0 accidents, which is expected. Because we have so many entries in data, and the probability of being in an accident is relatively small, this graph is exposed to skewedness, and thus we cannnot say that all these data points greater than 0 are outliers.
 
 
@@ -115,23 +114,112 @@ fig = plot_ly(y = cleannyc$NUMBER.OF.PERSONS.INJURED, type = "box", name = "Numb
 fig = fig %>% add_trace(y = cleannyc$NUMBER.OF.MOTORIST.INJURED, name = "Number of Motorists Injured") %>% layout(title = "Persons Injured and Motorist Injured Outlier Analysis")
 fig
 ```
-# Research Question 1 - [INSERT QUESTION HERE]
+# Research Question 1 - What are the trends in road accidents in New York City?
 
-Here you should
+Here we explore the frequencies of road accidents happening according to the time of the day. To provide emergency assistance to victims, the NYC Fire Department (FDNY) and (FDNY) Bureau of Emergency Medical Services (EMS) has 340 fire engines and 450 ambulances respectively^1^.  
 
-- Address stakeholders
-- Wrangle your data to explore your research question
-- Create some visualisations
-- Provide a conclusion to the research question
+In the graph below we see the trend of no. of road accidents happening over the course of 2012 to 2019.  
+```{r}
+as.Date(nyc$CRASH.DATE, tryFormats = c("%m/%d/%Y")) -> nyc$CRASH.DATE
+as.data.frame(table(nyc$CRASH.DATE)) -> date_table
+```
+```{r}
+plot_ly(date_table, x= ~Var1, y = ~Freq, type = "scatter", mode = "lines", text = paste(date_table$Var1, ", ", date_table$Freq)) -> fig1
+fig1 %>% layout(title = "No. of accidents per day in NYC (2012-2019)",
+               yaxis = list(title = "No. of Accidents (in 1 day)"),
+               xaxis = list(title = "Date",
+                            type = "date",
+                            range = c("2012-07-01", "2019-12-03"))) -> fig1
+fig1
+```
 
-# Research Question 2 - [INSERT QUESTION HERE]
+From the above graph we can see that the frequency of road accidents happening per day has been fairly constant over the years. On an average, New York City has `r round(nrow(nyc)/length(unique(nyc$CRASH.DATE)),2)` road accidents per day. But to counter this, the FDNY average response time for vehicle accidents stands at a poor 60 minutes and 27 seconds^2^ which is 4 times the national average of 15 minutes and 19 seconds^3^.  
 
-Here you should
+According to Mark Cunningham in EMS. One More Time(2015)^4^, the reason for this poor performance is systemic inefficiency ranging from fewer working hours for EMS drivers to poor algorithm design for assigning operators.  
+This problem can be addressed by understanding and analyzing the trends in traffic incidences. For instance, it can be observed from the above graph that 25^th^ December is often the least violent day on the road of the year. By exploring more such trends, the FDNY would be better equipped to improve their response time and save numerous lives.  
 
-- Address stakeholders
-- Wrangle your data to explore your research question
-- Create some visualisations
-- Provide a conclusion to the research question
+```{r}
+cleannyc %>% separate(CRASH.TIME, c("hour", "min"), ":") %>% separate(CRASH.DATE, c("Month", "Day", "Year"), "/", remove = FALSE) -> cleannyc
+```
+```{r}
+as.data.frame(table(cleannyc$hour)) -> time_freq
+time_freq[order(time_freq$Var1),] -> time_freq$Var1
+time_freq$Var1$Freq  <- NULL
+```
+
+
+```{r}
+cleannyc %>% mutate(
+  killed = (NUMBER.OF.PERSONS.KILLED + 
+              NUMBER.OF.PEDESTRIANS.KILLED + 
+              NUMBER.OF.CYCLIST.KILLED + 
+              NUMBER.OF.MOTORIST.KILLED
+            ), 
+  injured = (NUMBER.OF.PERSONS.INJURED + 
+               NUMBER.OF.PEDESTRIANS.INJURED + 
+               NUMBER.OF.CYCLIST.INJURED + 
+               NUMBER.OF.MOTORIST.INJURED
+             )) %>% mutate(
+      score = (killed * 0.1 + injured*0.025)) -> cleannyc
+```
+
+## Daily trend in Accident Occurence
+We first look at the the timings of the accidents in the day. The following graph plots the number of road crash victims against the time of the accident.
+```{r}
+i = 0
+kills=c()
+injuries= c()
+while (i<24){
+  sum(cleannyc[cleannyc$hour == i,]$killed) -> killed_sum
+  sum(cleannyc[cleannyc$hour == i,]$injured) -> injured_sum
+  kills = c(kills, killed_sum)
+  injuries = c(injuries, injured_sum)
+  i = i+1
+}
+as.data.frame(cbind(time_freq, kills, injuries)) -> time_score
+```
+```{r}
+fig3 = plot_ly(time_score, x = ~Var1, y = ~kills, type = 'scatter', mode = "lines+markers", name = "Deaths")
+fig3 %>% add_trace(y = ~injuries, name = "Injuries") -> fig3
+fig3 <- fig3 %>% layout(yaxis = list(title = 'Count'), barmode = 'group')
+fig3 %>% layout(title = "Hourly deaths and injuries from road accidents", 
+                xaxis = list(title = "Time of the day",
+                             ticktext = list("00:00-01:00", "01:00-02:00", "02:00-03:00","03:00-04:00", "04:00-05:00","05:00-06:00","06:00-07:00", "07:00-08:00", "08:00-09:00", "09:00-10:00", "10:00-11:00","11:00-12:00","12:00-13:00", "13:00-14:00", "14:00-15:00", "15:00-16:00", "16:00-17:00", "17:00-18:00", "18:00-19:00", "19:00-20:00", "20:00-21:00", "21:00-22:00", "22:00-23:00", "23:00-00:00"),
+                             tickvals = list(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23)),
+                yaxis = list(title = "No. of Cases")) -> fig3
+fig3
+```
+From the graph, we see a spike in accidents between 8 to 9 am. This is when people go to their workplaces. We can also observe that the highest amount of fatalities are found between the timings 4 pm to 6pm.  
+This is usually the time when the working class return from their offices. It also coincides with people going out in the evening. Thus, this increases the chances of an accident happening. Since people are usually tired after a day's work, the chances of driving errors is higher as well.  
+
+During these times, the FDNY and emergency medical services should be the most alert. Since New York firemen work in 8-hour long shifts, it should be ensured that the shift change should not happen during these periods.
+
+
+## Weekly trend in Accident Occurence
+
+We now explore which days of the week are the most prone to accidents. The graph below plots the number of accidents against the days of the week. 
+
+```{r}
+day = weekdays(as.Date(cleannyc$CRASH.DATE, tryFormats = "%m/%d/%Y"))
+cleannyc = cbind(cleannyc, day)
+as.data.frame(table(cleannyc$day)) -> day_table
+factor(day_table$Var1, levels= c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")) -> day_table$Var1
+fig4 = plot_ly(day_table, x = ~Var1, y = ~Freq, type = "bar")
+fig4 %>% layout(title = "Weekly trends in Road Accidents (2012-2019)",
+                yaxis = list(title ="No. of Accidents"),
+                xaxis = list(title = "Day of the Week")) -> fig4
+fig4
+```
+
+Here we observe that Friday has the highest amount of road accidents happening and the weekends: Saturday and Sunday have significantly fewer accidents compared to weekdays.  
+Fridays tend to be crowded on the roads as most people go out during Friday evenings before the weekend.  
+Apart from Friday, the no. of accidents occuring is around the same during the weekdays. The weekends are safer since most workplaces are closed and thus, fewer people go out during the day.  
+
+The emergency services dept. should consider having longer shifts for emergency personnel on the days with higher traffic.  
+
+Apart from this, New York City Fire Department should consider investing into hiring more personnel and increasing emergency stations around the city to reduce the response time. A limitation of this dataset was that it does not contain independent contractual service providers which are common in New York due to its inefficient emergency services. These providers are contractually obligated to provide service in a given timeframe. Hence, they perform much better than the FDNY.  
+By incorporating the learnings from the above observations, the FDNY can aim to become a competent and trustable emergency service provider. 
+
 
 # Reflection on Data Wrangling
 
@@ -144,6 +232,14 @@ City of New York. (2021). Vision Zero in New York City. Retrieved from https://w
 NYC OpenData. (2021). Motor Vehicle Collisions - Crashes. Retrieved from https://data.cityofnewyork.us/Public-Safety/Motor-Vehicle-Collisions-Crashes/h9gi-nx95.
 
 Sullivan & Galleshaw LLP. (2021, 2021). How Common are Car Accidents in NYC? Retrieved from https://www.sullivangalleshaw.com/common-car-accidents-nyc/.
+
+1. Fleet Report - Mayor's Office of Operations. (2021). Retrieved 2 July 2021, from   <https://www1.nyc.gov/site/operations/performance/fleet-report.page>   
+
+2.  End-to-End Response Time - 911 Reporting . (2021). Retrieved 2 July 2021, from    <https://www1.nyc.gov/site/911reporting/reports/end-to-end-repsonse-time.page>  
+
+3. NHTSA(2021). Retrieved 3 July 2021, from    <https://www-fars.nhtsa.dot.gov/Main/index.aspx>  
+
+4. EMS, One More Time. (2015). Retrieved 4 July 2021, from    <https://www.city-journal.org/html/ems-one-more-time-12793.html?wallit_nosession=1>
 
 
 
